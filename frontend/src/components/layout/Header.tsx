@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, Transition } from '@headlessui/react';
 import {
@@ -8,6 +8,7 @@ import {
   UserCircleIcon
 } from '@heroicons/react/24/outline';
 import LanguageToggle from '../ui/LanguageToggle';
+import NotificationPopup, { Notification } from '../ui/NotificationPopup';
 import clsx from 'clsx';
 
 interface HeaderProps {
@@ -17,6 +18,34 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { t } = useTranslation();
   const [selectedFarm, setSelectedFarm] = useState('Demo Farm');
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      type: 'alert',
+      title: 'High pH Alert - Zone A',
+      message: 'pH level has exceeded the safe threshold (7.5). Immediate action required.',
+      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+      read: false,
+    },
+    {
+      id: '2',
+      type: 'warning',
+      title: 'Low Water Level - Reservoir 1',
+      message: 'Water level is below 20%. Consider refilling soon.',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+      read: false,
+    },
+    {
+      id: '3',
+      type: 'success',
+      title: 'System Update Complete',
+      message: 'All sensors have been successfully calibrated and are now online.',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      read: true,
+    },
+  ]);
 
   const farms = [
     { id: '1', name: 'Demo Farm', location: 'Maharashtra, India' },
@@ -29,6 +58,40 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     email: 'shubham@hydrobloom.com',
     avatar: null,
   };
+
+  const unreadNotifications = notifications.filter(n => !n.read);
+
+  const handleNotificationClick = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(notifications.map(notification =>
+      notification.id === id ? { ...notification, read: true } : notification
+    ));
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(notification => ({ ...notification, read: true })));
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+    setIsNotificationOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-dark-900 border-b border-dark-800 px-4 sm:px-6 lg:px-8 shadow-lg">
@@ -91,13 +154,26 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <LanguageToggle />
 
           {/* Notifications */}
-          <div className="relative">
-            <button className="p-2 text-gray-400 hover:text-neon-cyan hover:bg-dark-800 rounded-md focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200">
+          <div className="relative" ref={notificationRef}>
+            <button
+              onClick={handleNotificationClick}
+              className="p-2 text-gray-400 hover:text-neon-cyan hover:bg-dark-800 rounded-md focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200"
+            >
               <BellIcon className="h-6 w-6" />
             </button>
-            <span className="absolute -top-1 -right-1 h-5 w-5 bg-neon-pink rounded-full flex items-center justify-center shadow-neon-pink animate-pulse">
-              <span className="text-xs text-white font-bold">3</span>
-            </span>
+            {unreadNotifications.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-neon-pink rounded-full flex items-center justify-center shadow-neon-pink animate-pulse">
+                <span className="text-xs text-white font-bold">{unreadNotifications.length}</span>
+              </span>
+            )}
+            <NotificationPopup
+              isOpen={isNotificationOpen}
+              onClose={() => setIsNotificationOpen(false)}
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+              onClearAll={handleClearAll}
+            />
           </div>
 
           {/* User menu */}
