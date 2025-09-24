@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "polyhouses": "Polyhouses",
+    "zones": "Zones",
+    "nurseries": "Nurseries",
+    "lifecycles": "Life Cycles",
+    "reservoirs": "Reservoirs",
+    "inventory": "Inventory",
+    "tasks": "Tasks",
+    "templates": "Templates",
+    "users": "Users",
+    "reports": "Reports",
+    "alerts": "Alerts"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "summary": {
+      "polyhouses": "Polyhouses",
+      "reservoirs": "Reservoirs",
+      "zones": "Zones",
+      "nurseries": "Nurseries",
+      "inventory": "Available Inventory",
+      "alarms": "Alarms",
+      "overdue_tasks": "Overdue Tasks",
+      "utilization": "Farm Utilization",
+      "expected_revenue": "Expected Harvest Revenue",
+      "inventory_cost": "Inventory Cost",
+      "sale_revenue": "Sale Revenue"
+    },
+    "weather": {
+      "title": "Weather",
+      "current": "Current Temperature",
+      "feels_like": "Feels like",
+      "humidity": "Humidity",
+      "wind": "Wind",
+      "pressure": "Pressure"
+    },
+    "sensors": {
+      "ph": "pH Level",
+      "ec": "EC Level"
+    },
+    "quick_actions": {
+      "title": "Quick Actions",
+      "add_alert": "Add Alert Configuration",
+      "add_task": "Add Task",
+      "add_user": "Add User"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "name": "Name",
+    "description": "Description",
+    "status": "Status",
+    "actions": "Actions",
+    "date": "Date",
+    "time": "Time",
+    "created_at": "Created At",
+    "updated_at": "Updated At",
+    "active": "Active",
+    "inactive": "Inactive",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot password?",
+    "welcome_back": "Welcome back!"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "create": "Create Task",
+    "open": "Open",
+    "in_progress": "In Progress",
+    "in_review": "In Review",
+    "closed": "Closed",
+    "priority": "Priority",
+    "due_date": "Due Date",
+    "assignee": "Assignee",
+    "category": "Category"
+  },
+  "users": {
+    "title": "Users",
+    "add_user": "Add User",
+    "role": "Role",
+    "phone": "Phone",
+    "language": "Language Preference",
+    "roles": {
+      "OWNER": "Owner",
+      "ADMIN": "Admin",
+      "FARM_MANAGER": "Farm Manager",
+      "VIEWER": "Viewer"
+    }
+  },
+  "alerts": {
+    "title": "Alerts & Notifications",
+    "add_alert": "Add Alert Configuration",
+    "name": "Alert Name",
+    "repeats_in": "Repeats in",
+    "channels": "Notification Channels",
+    "conditions": "Conditions",
+    "subscribers": "Subscribers",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "sms": "SMS"
+  }
+}
