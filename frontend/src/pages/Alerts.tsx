@@ -46,7 +46,7 @@ const Alerts: React.FC = () => {
           unit: '',
         },
       ],
-      subscribers: ['shubham@hydrobloom.com', 'priya@hydrobloom.com'],
+      subscribers: ['shubham@EcoFarmLogix.com', 'priya@EcoFarmLogix.com'],
       lastTriggered: '2025-09-23T10:30:00Z',
       createdAt: '2025-09-20',
     },
@@ -66,7 +66,7 @@ const Alerts: React.FC = () => {
           unit: '%',
         },
       ],
-      subscribers: ['raj@hydrobloom.com'],
+      subscribers: ['raj@EcoFarmLogix.com'],
       createdAt: '2025-09-21',
     },
     {
@@ -85,7 +85,7 @@ const Alerts: React.FC = () => {
           unit: '°C',
         },
       ],
-      subscribers: ['anita@hydrobloom.com', 'shubham@hydrobloom.com'],
+      subscribers: ['anita@EcoFarmLogix.com', 'shubham@EcoFarmLogix.com'],
       createdAt: '2025-09-22',
     },
   ]);

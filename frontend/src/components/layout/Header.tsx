@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import {
   Bars3Icon,
   BellIcon,
   ChevronDownIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import LanguageToggle from '../ui/LanguageToggle';
 import NotificationPopup, { Notification } from '../ui/NotificationPopup';
+import { useAuth } from '../../contexts/AuthContext';
 import clsx from 'clsx';
 
 interface HeaderProps {
@@ -17,6 +20,8 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [selectedFarm, setSelectedFarm] = useState('Demo Farm');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -52,11 +57,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     { id: '2', name: 'Green Valley Farm', location: 'Punjab, India' },
   ];
 
-  const user = {
-    name: 'Shubham Aher',
-    role: 'Farm Manager',
-    email: 'shubham@hydrobloom.com',
-    avatar: null,
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const unreadNotifications = notifications.filter(n => !n.read);
@@ -179,14 +182,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           {/* User menu */}
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center space-x-2 text-sm text-gray-200 hover:text-neon-green focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:ring-offset-2 focus:ring-offset-dark-900 rounded-lg p-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 hover:border-neon-green transition-all duration-200">
-              {user.avatar ? (
-                <img className="h-8 w-8 rounded-full border-2 border-neon-cyan" src={user.avatar} alt={user.name} />
-              ) : (
-                <UserCircleIcon className="h-8 w-8 text-neon-cyan" />
-              )}
+              <UserCircleIcon className="h-8 w-8 text-neon-cyan" />
               <div className="hidden sm:block text-left">
-                <div className="font-medium text-white">{user.name}</div>
-                <div className="text-xs text-gray-400">{user.role}</div>
+                <div className="font-medium text-white">{user?.name}</div>
+                <div className="text-xs text-gray-400">{user?.role?.replace('_', ' ') || 'Farm Manager'}</div>
               </div>
               <ChevronDownIcon className="h-4 w-4" />
             </Menu.Button>
@@ -215,12 +214,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   <Menu.Item>
                     {({ active }) => (
                       <button
+                        onClick={handleLogout}
                         className={clsx(
                           active ? 'bg-dark-700 text-neon-green' : 'text-gray-200',
-                          'block w-full text-left px-4 py-2 text-sm hover:bg-dark-700 transition-colors duration-150'
+                          'flex items-center w-full text-left px-4 py-2 text-sm hover:bg-dark-700 transition-colors duration-150'
                         )}
                       >
-                        {t('auth.logout')}
+                        <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                        Sign Out
                       </button>
                     )}
                   </Menu.Item>

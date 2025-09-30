@@ -21,7 +21,7 @@ const Users: React.FC = () => {
     {
       id: '1',
       name: 'Shubham Aher',
-      email: 'shubham@hydrobloom.com',
+      email: 'shubham@EcoFarmLogix.com',
       phone: '+91 98765 43210',
       role: 'OWNER',
       languagePref: 'en',
@@ -31,7 +31,7 @@ const Users: React.FC = () => {
     {
       id: '2',
       name: 'Priya Sharma',
-      email: 'priya@hydrobloom.com',
+      email: 'priya@EcoFarmLogix.com',
       phone: '+91 98765 43211',
       role: 'ADMIN',
       languagePref: 'hi',
@@ -41,7 +41,7 @@ const Users: React.FC = () => {
     {
       id: '3',
       name: 'Raj Patel',
-      email: 'raj@hydrobloom.com',
+      email: 'raj@EcoFarmLogix.com',
       phone: '+91 98765 43212',
       role: 'FARM_MANAGER',
       languagePref: 'en',
@@ -51,7 +51,7 @@ const Users: React.FC = () => {
     {
       id: '4',
       name: 'Anita Singh',
-      email: 'anita@hydrobloom.com',
+      email: 'anita@EcoFarmLogix.com',
       phone: '+91 98765 43213',
       role: 'VIEWER',
       languagePref: 'hi',

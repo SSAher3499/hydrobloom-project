@@ -3,7 +3,19 @@
     "allow": [
       "Bash(npx tailwindcss init:*)",
       "Bash(npm install:*)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(start http://localhost:3000)",
+      "Bash(curl http://localhost:5000/api/health)",
+      "Bash(ssh root@77.37.47.14 \"sudo -u postgres psql -c \"\"ALTER USER postgres PASSWORD ''EcoFarm2025!'';\"\"\")",
+      "Bash(ssh root@77.37.47.14 \"sudo -u postgres createdb ecofarmlogix 2>/dev/null || echo ''Database already exists''\")",
+      "Bash(ssh:*)",
+      "Bash(curl -s https://iot.chandramaautomation.com/)",
+      "Bash(git add:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

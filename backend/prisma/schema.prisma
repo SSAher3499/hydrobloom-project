@@ -9,26 +9,35 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
-  phone             String?
-  name              String
-  role              Role     @default(FARM_MANAGER)
-  languagePref      String   @default("en")
-  isActive          Boolean  @default(true)
-  passwordHash      String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  mobile              String?  @unique
+  name                String
+  role                Role     @default(FARM_MANAGER)
+  languagePref        String   @default("en")
+  isActive            Boolean  @default(true)
+  passwordHash        String?
+  onboardingCompleted Boolean  @default(false)
+  locationLat         Float?
+  locationLng         Float?
+  locationPlaceId     String?
+  address             String?
+  emailVerified       Boolean  @default(false)
+  mobileVerified      Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   // Relations
-  assignedTasks     Task[]
+  assignedTasks      Task[]
   alertSubscriptions AlertSubscription[]
-  farmAccess        FarmAccess[]
+  farmAccess         FarmAccess[]
+  ownedAssets        Asset[]
+  createdInvites     Invite[]
 
   @@map("users")
 }
@@ -209,7 +218,7 @@ model Task {
   dueDate       DateTime?
   isRecurring   Boolean     @default(false)
   recurringType String?
-  attachments   String[]
+  attachments   String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -260,7 +269,7 @@ model AlertConfig {
   repeatUnit  String
   isActive    Boolean   @default(true)
   conditions  Json
-  channels    String[]
+  channels    String?
   lastTriggered DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -372,4 +381,61 @@ enum Priority {
 enum TransactionType {
   INBOUND
   OUTBOUND
+}
+
+model Asset {
+  id             String   @id @default(cuid())
+  ownerId        String
+  type           AssetType
+  name           String
+  controllerMacid String  @unique
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("assets")
+}
+
+model Invite {
+  id           String      @id @default(cuid())
+  email        String?
+  mobile       String?
+  role         Role        @default(VIEWER)
+  status       InviteStatus @default(PENDING)
+  languagePref String      @default("en")
+  token        String      @unique
+  expiresAt    DateTime
+  createdById  String
+  createdAt    DateTime    @default(now())
+
+  // Relations
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@map("invites")
+}
+
+model OtpLog {
+  id        String   @id @default(cuid())
+  contact   String
+  otpHash   String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  sentAt    DateTime @default(now())
+  usedAt    DateTime?
+
+  @@map("otp_logs")
+}
+
+enum AssetType {
+  POLYHOUSE
+  FERTIGATION
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
 }

@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 </div>
               </div>
               <span className="ml-3 text-xl font-bold bg-gradient-to-r from-neon-cyan to-neon-green bg-clip-text text-transparent">
-                HydroBloom
+                EcoFarmLogix
               </span>
             </div>
             <button
