@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { PlusIcon, UserCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { farmApi } from '../services/api';
+
+const FARM_ID = 'demo-farm-1';
 
 interface Task {
   id: string;
   title: string;
   description?: string;
-  assignee?: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
+  assignee?: string;
   dueDate?: string;
   category?: string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  status: string;
+  isOverdue?: boolean;
 }
 
 interface Column {
@@ -26,78 +27,67 @@ interface Column {
 
 const Tasks: React.FC = () => {
   const { t } = useTranslation();
-
   const [columns, setColumns] = useState<Column[]>([
-    {
-      id: 'open',
-      title: t('tasks.open'),
-      tasks: [
-        {
-          id: '1',
-          title: 'Check pH levels in Zone A',
-          description: 'Monitor and adjust pH levels in the hydroponic system',
-          assignee: { id: '1', name: 'John Doe' },
-          dueDate: '2025-09-25',
-          category: 'Monitoring',
-          priority: 'HIGH',
-        },
-        {
-          id: '2',
-          title: 'Harvest lettuce batch #23',
-          description: 'Ready for harvest in polyhouse 2',
-          assignee: { id: '2', name: 'Jane Smith' },
-          dueDate: '2025-09-24',
-          category: 'Harvest',
-          priority: 'URGENT',
-        },
-      ],
-    },
-    {
-      id: 'in_progress',
-      title: t('tasks.in_progress'),
-      tasks: [
-        {
-          id: '3',
-          title: 'Install new sensors in Zone B',
-          description: 'Setting up temperature and humidity sensors',
-          assignee: { id: '3', name: 'Mike Johnson' },
-          dueDate: '2025-09-26',
-          category: 'Installation',
-          priority: 'MEDIUM',
-        },
-      ],
-    },
-    {
-      id: 'in_review',
-      title: t('tasks.in_review'),
-      tasks: [
-        {
-          id: '4',
-          title: 'Weekly maintenance report',
-          description: 'Review and submit maintenance activities',
-          assignee: { id: '1', name: 'John Doe' },
-          dueDate: '2025-09-23',
-          category: 'Reporting',
-          priority: 'MEDIUM',
-        },
-      ],
-    },
-    {
-      id: 'closed',
-      title: t('tasks.closed'),
-      tasks: [
-        {
-          id: '5',
-          title: 'Clean water reservoirs',
-          description: 'Monthly cleaning completed',
-          assignee: { id: '2', name: 'Jane Smith' },
-          dueDate: '2025-09-20',
-          category: 'Maintenance',
-          priority: 'LOW',
-        },
-      ],
-    },
+    { id: 'OPEN', title: t('tasks.open'), tasks: [] },
+    { id: 'IN_PROGRESS', title: t('tasks.in_progress'), tasks: [] },
+    { id: 'IN_REVIEW', title: t('tasks.in_review'), tasks: [] },
+    { id: 'CLOSED', title: t('tasks.closed'), tasks: [] },
   ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data = await farmApi.getTasksSummary(FARM_ID);
+
+        // Group tasks by status
+        const tasksByStatus: Record<string, Task[]> = {
+          OPEN: [],
+          IN_PROGRESS: [],
+          IN_REVIEW: [],
+          CLOSED: [],
+        };
+
+        data.tasks.forEach((task: any) => {
+          if (tasksByStatus[task.status]) {
+            tasksByStatus[task.status].push({
+              id: task.id,
+              title: task.title,
+              description: task.description || '',
+              assignee: task.assignee,
+              dueDate: task.dueDate,
+              category: task.category || '',
+              priority: task.priority,
+              status: task.status,
+              isOverdue: task.isOverdue,
+            });
+          }
+        });
+
+        setColumns((prev) =>
+          prev.map((col) => ({
+            ...col,
+            tasks: tasksByStatus[col.id] || [],
+          }))
+        );
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-neon-cyan text-xl">Loading...</div>
+      </div>
+    );
+  }
+
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {

@@ -277,8 +277,30 @@ model AlertConfig {
   // Relations
   farm          Farm                @relation(fields: [farmId], references: [id], onDelete: Cascade)
   subscribers   AlertSubscription[]
+  alerts        Alert[]
 
   @@map("alert_configs")
+}
+
+model Alert {
+  id              String      @id @default(cuid())
+  configId        String?
+  farmId          String
+  severity        AlertSeverity @default(MEDIUM)
+  title           String
+  message         String
+  source          String?
+  isAcknowledged  Boolean     @default(false)
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime?
+  isResolved      Boolean     @default(false)
+  resolvedAt      DateTime?
+  createdAt       DateTime    @default(now())
+
+  // Relations
+  config AlertConfig? @relation(fields: [configId], references: [id], onDelete: SetNull)
+
+  @@map("alerts")
 }
 
 model AlertSubscription {
@@ -438,4 +460,34 @@ enum InviteStatus {
   PENDING
   ACCEPTED
   EXPIRED
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Command {
+  id          String      @id @default(cuid())
+  farmId      String
+  targetType  String
+  targetId    String
+  action      String
+  parameters  Json?
+  status      CommandStatus @default(PENDING)
+  requestedBy String?
+  executedAt  DateTime?
+  result      String?
+  error       String?
+  createdAt   DateTime    @default(now())
+
+  @@map("commands")
+}
+
+enum CommandStatus {
+  PENDING
+  EXECUTED
+  FAILED
 }

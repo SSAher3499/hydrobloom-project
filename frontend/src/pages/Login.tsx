@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import {
@@ -13,13 +13,13 @@ import {
 import { AuthService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 
-const schema = yup.object().shape({
-  contact: yup.string().required('Email or mobile number is required'),
-});
-
-interface FormData {
+type LoginFormData = {
   contact: string;
-}
+};
+
+const loginSchema: yup.ObjectSchema<LoginFormData> = yup.object({
+  contact: yup.string().required('Email or mobile number is required'),
+}).required();
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -35,11 +35,14 @@ const Login: React.FC = () => {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
+  } = useForm<LoginFormData>({
+    resolver: yupResolver<LoginFormData>(loginSchema),
+    defaultValues: {
+      contact: '',
+    },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     setIsLoading(true);
     setError(null);
 

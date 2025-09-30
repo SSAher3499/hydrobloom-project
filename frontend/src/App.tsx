@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Users from './pages/Users';
 import Alerts from './pages/Alerts';
+import Polyhouses from './pages/Polyhouses';
+import Reservoirs from './pages/Reservoirs';
 import Login from './pages/Login';
 import LoginPassword from './pages/LoginPassword';
 import OtpVerify from './pages/OtpVerify';
@@ -74,7 +76,7 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div>Polyhouses Page</div>
+                    <Polyhouses />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -114,7 +116,7 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div>Reservoirs Page</div>
+                    <Reservoirs />
                   </Layout>
                 </ProtectedRoute>
               }

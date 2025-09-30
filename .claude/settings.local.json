@@ -15,7 +15,10 @@
       "Bash(ssh:*)",
       "Bash(curl -s https://iot.chandramaautomation.com/)",
       "Bash(git add:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(echo \")"
     ],
     "deny": [],
     "ask": []

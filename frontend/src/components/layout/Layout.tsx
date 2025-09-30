@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         activeId={activeId}
         onNavigate={handleNavigate}
         defaultOpenIds={['farms']}
-        className="h-screen sticky top-0"
+        className="h-screen sticky top-0 flex-shrink-0"
       />
 
       {/* Toggle Button */}
@@ -61,14 +61,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col flex-1 overflow-hidden transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-16' : 'ml-64'
-      }`}>
+      <div className="flex flex-col flex-1 overflow-hidden">
         <Header onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} />
 
         <main className="flex-1 relative overflow-y-auto focus:outline-none bg-dark-950">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-6 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-full">
               {children}
             </div>
           </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import {
@@ -15,17 +15,20 @@ import { OnboardingService, InviteUser } from '../services/onboardingService';
 import { AuthService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 
-const schema = yup.object().shape({
-  contact: yup.string().required('Email or mobile number is required'),
-  role: yup.string().oneOf(['OWNER', 'ADMIN', 'FARM_MANAGER', 'VIEWER']).required('Role is required'),
-  languagePref: yup.string().oneOf(['en', 'hi']).required('Language preference is required'),
-});
+type Role = 'OWNER' | 'ADMIN' | 'FARM_MANAGER' | 'VIEWER';
+type Lang = 'en' | 'hi';
 
-interface FormData {
+type OnboardingFormData = {
   contact: string;
-  role: 'OWNER' | 'ADMIN' | 'FARM_MANAGER' | 'VIEWER';
-  languagePref: 'en' | 'hi';
-}
+  role: Role;
+  languagePref: Lang;
+};
+
+const onboardingSchema: yup.ObjectSchema<OnboardingFormData> = yup.object({
+  contact: yup.string().required('Email or mobile number is required'),
+  role: yup.mixed<Role>().oneOf(['OWNER', 'ADMIN', 'FARM_MANAGER', 'VIEWER']).required('Role is required'),
+  languagePref: yup.mixed<Lang>().oneOf(['en', 'hi']).required('Language preference is required'),
+}).required();
 
 const OnboardingUsers: React.FC = () => {
   const { t } = useTranslation();
@@ -43,9 +46,10 @@ const OnboardingUsers: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
+  } = useForm<OnboardingFormData>({
+    resolver: yupResolver<OnboardingFormData>(onboardingSchema),
     defaultValues: {
+      contact: '',
       role: 'FARM_MANAGER',
       languagePref: 'en',
     },
@@ -56,7 +60,7 @@ const OnboardingUsers: React.FC = () => {
     return emailRegex.test(contact);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit: SubmitHandler<OnboardingFormData> = async (data) => {
     if (!token) {
       setError('Authentication required');
       return;

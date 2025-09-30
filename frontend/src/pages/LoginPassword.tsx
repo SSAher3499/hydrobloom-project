@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import {
@@ -15,15 +15,15 @@ import {
 import { AuthService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 
-const schema = yup.object().shape({
-  contact: yup.string().required('Email or mobile number is required'),
-  password: yup.string().required('Password is required'),
-});
-
-interface FormData {
+type PasswordFormData = {
   contact: string;
   password: string;
-}
+};
+
+const passwordSchema: yup.ObjectSchema<PasswordFormData> = yup.object({
+  contact: yup.string().required('Email or mobile number is required'),
+  password: yup.string().required('Password is required'),
+}).required();
 
 const LoginPassword: React.FC = () => {
   const { t } = useTranslation();
@@ -39,15 +39,15 @@ const LoginPassword: React.FC = () => {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
+  } = useForm<PasswordFormData>({
+    resolver: yupResolver<PasswordFormData>(passwordSchema),
     defaultValues: {
-      contact: location.state?.contact || '',
+      contact: location.state?.contact ?? '',
       password: '',
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit: SubmitHandler<PasswordFormData> = async (data) => {
     setIsLoading(true);
     setError(null);
 
