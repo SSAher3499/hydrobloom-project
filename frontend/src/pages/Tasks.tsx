@@ -245,17 +245,9 @@ const Tasks: React.FC = () => {
                                 <div className="flex items-center justify-between">
                                   {task.assignee && (
                                     <div className="flex items-center space-x-2">
-                                      {task.assignee.avatar ? (
-                                        <img
-                                          src={task.assignee.avatar}
-                                          alt={task.assignee.name}
-                                          className="w-6 h-6 rounded-full"
-                                        />
-                                      ) : (
-                                        <UserCircleIcon className="w-6 h-6 text-gray-400" />
-                                      )}
+                                      <UserCircleIcon className="w-6 h-6 text-gray-400" />
                                       <span className="text-xs text-gray-600">
-                                        {task.assignee.name}
+                                        {task.assignee}
                                       </span>
                                     </div>
                                   )}
