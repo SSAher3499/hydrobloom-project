@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { io } from 'socket.io-client';
+import io from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 
 const SOCKET_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
