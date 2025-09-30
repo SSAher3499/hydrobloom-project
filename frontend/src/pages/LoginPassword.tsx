@@ -40,7 +40,7 @@ const LoginPassword: React.FC = () => {
     formState: { errors },
     getValues,
   } = useForm<PasswordFormData>({
-    resolver: yupResolver<PasswordFormData>(passwordSchema),
+    resolver: yupResolver(passwordSchema) as any,
     defaultValues: {
       contact: location.state?.contact ?? '',
       password: '',

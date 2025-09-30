@@ -17,9 +17,9 @@ type LoginFormData = {
   contact: string;
 };
 
-const loginSchema: yup.ObjectSchema<LoginFormData> = yup.object({
+const loginSchema = yup.object().shape({
   contact: yup.string().required('Email or mobile number is required'),
-}).required();
+});
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
     formState: { errors },
     getValues,
   } = useForm<LoginFormData>({
-    resolver: yupResolver<LoginFormData>(loginSchema),
+    resolver: yupResolver(loginSchema) as any,
     defaultValues: {
       contact: '',
     },

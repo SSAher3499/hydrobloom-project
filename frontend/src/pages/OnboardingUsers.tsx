@@ -47,7 +47,7 @@ const OnboardingUsers: React.FC = () => {
     reset,
     formState: { errors },
   } = useForm<OnboardingFormData>({
-    resolver: yupResolver<OnboardingFormData>(onboardingSchema),
+    resolver: yupResolver(onboardingSchema) as any,
     defaultValues: {
       contact: '',
       role: 'FARM_MANAGER',

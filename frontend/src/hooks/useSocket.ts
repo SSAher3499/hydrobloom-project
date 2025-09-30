@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 
 const SOCKET_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -15,7 +15,7 @@ interface TelemetryData {
 }
 
 export const useSocket = (farmId: string | null) => {
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
