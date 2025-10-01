@@ -12,6 +12,7 @@ import Polyhouses from './pages/Polyhouses';
 import Reservoirs from './pages/Reservoirs';
 import Login from './pages/Login';
 import LoginPassword from './pages/LoginPassword';
+import LoginEmail from './pages/LoginEmail';
 import OtpVerify from './pages/OtpVerify';
 import Register from './pages/Register';
 import OnboardingAssets from './pages/OnboardingAssets';
@@ -30,6 +31,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/login/password" element={<LoginPassword />} />
+            <Route path="/login/email" element={<LoginEmail />} />
             <Route path="/otp-verify" element={<OtpVerify />} />
             <Route path="/register" element={<Register />} />
             <Route path="/sidebar-demo" element={<SidebarDemo />} />

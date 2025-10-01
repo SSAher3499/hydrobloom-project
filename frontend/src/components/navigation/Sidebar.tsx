@@ -277,7 +277,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <nav
       className={clsx(
-        'bg-gray-800 text-white transition-all duration-300 ease-in-out overflow-hidden',
+        'bg-gray-800 text-white transition-all duration-300 ease-in-out h-full flex flex-col',
         {
           'w-64': !collapsed,
           'w-16': collapsed,
@@ -287,8 +287,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className={clsx('p-4', { 'px-2': collapsed })}>
-        {/* Logo/Brand area - you can customize this */}
+      {/* Logo/Brand area - Fixed at top */}
+      <div className={clsx('p-4 flex-shrink-0', { 'px-2': collapsed })}>
         {!collapsed && (
           <div className="mb-6">
             <h1 className="text-xl font-bold text-green-400">🌱 EcoFarmLogix</h1>
@@ -300,8 +300,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             <span className="text-2xl">🌱</span>
           </div>
         )}
+      </div>
 
-        {/* Menu Items */}
+      {/* Menu Items - Scrollable */}
+      <div className={clsx('flex-1 overflow-y-auto px-4 pb-4', { 'px-2': collapsed })}>
         <div className="space-y-1" role="menu">
           {menuData.map((item) => (
             <SidebarMenuItem

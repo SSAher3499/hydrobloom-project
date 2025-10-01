@@ -491,3 +491,16 @@ enum CommandStatus {
   EXECUTED
   FAILED
 }
+
+model EmailOtp {
+  id         String   @id @default(cuid())
+  email      String
+  otpHash    String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([email, expiresAt])
+  @@map("email_otps")
+}

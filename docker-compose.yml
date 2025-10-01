@@ -30,6 +30,13 @@ services:
       timeout: 10s
       retries: 3
 
+  # MailHog for email testing
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+
   # Backend API
   backend:
     build:

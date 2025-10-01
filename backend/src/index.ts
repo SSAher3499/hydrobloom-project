@@ -9,6 +9,7 @@ import authRoutes from './routes/auth';
 import onboardingRoutes from './routes/onboarding';
 import farmRoutes from './routes/farm';
 import commandRoutes from './routes/command';
+import otpRoutes from './routes/auth.otp.routes';
 import prisma from './lib/prisma';
 
 dotenv.config();
@@ -48,6 +49,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'EcoFarmLogix API is running' });
 });
+
+// Email OTP routes
+app.use('/api', otpRoutes);
 
 // Auth routes with rate limiting for OTP
 app.use('/api/auth/send-otp', otpLimiter);
