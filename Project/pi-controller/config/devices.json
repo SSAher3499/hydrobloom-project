@@ -1,0 +1,86 @@
+{
+  "sensors": [
+    {
+      "id": "temp_sensor_1",
+      "name": "Zone 1 Temperature",
+      "slaveId": 1,
+      "registerAddr": 0,
+      "registerType": "holding",
+      "functionCode": 3,
+      "scalingFactor": 0.1,
+      "scalingOffset": 0,
+      "unit": "°C"
+    },
+    {
+      "id": "humidity_sensor_1",
+      "name": "Zone 1 Humidity",
+      "slaveId": 1,
+      "registerAddr": 1,
+      "registerType": "holding",
+      "functionCode": 3,
+      "scalingFactor": 0.1,
+      "scalingOffset": 0,
+      "unit": "%"
+    },
+    {
+      "id": "ph_sensor_1",
+      "name": "Reservoir pH",
+      "slaveId": 2,
+      "registerAddr": 0,
+      "registerType": "input",
+      "functionCode": 4,
+      "scalingFactor": 0.01,
+      "scalingOffset": 0,
+      "unit": "pH"
+    },
+    {
+      "id": "ec_sensor_1",
+      "name": "Reservoir EC",
+      "slaveId": 2,
+      "registerAddr": 1,
+      "registerType": "input",
+      "functionCode": 4,
+      "scalingFactor": 0.001,
+      "scalingOffset": 0,
+      "unit": "mS/cm"
+    }
+  ],
+  "actuators": [
+    {
+      "id": "fan_1",
+      "name": "Exhaust Fan 1",
+      "slaveId": 1,
+      "registerAddr": 0,
+      "registerType": "coil",
+      "functionCode": 5,
+      "unit": "ON/OFF"
+    },
+    {
+      "id": "fogger_1",
+      "name": "Fogger Motor 1",
+      "slaveId": 1,
+      "registerAddr": 1,
+      "registerType": "holding",
+      "functionCode": 6,
+      "unit": "PWM %"
+    },
+    {
+      "id": "pump_1",
+      "name": "Irrigation Pump 1",
+      "slaveId": 1,
+      "registerAddr": 2,
+      "registerType": "coil",
+      "functionCode": 5,
+      "unit": "ON/OFF"
+    },
+    {
+      "id": "valve_1",
+      "name": "Nutrient Valve 1",
+      "slaveId": 1,
+      "registerAddr": 3,
+      "registerType": "coil",
+      "functionCode": 5,
+      "unit": "ON/OFF"
+    }
+  ]
+}

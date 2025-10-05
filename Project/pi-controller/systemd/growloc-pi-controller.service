@@ -1,0 +1,26 @@
+[Unit]
+Description=Growloc Pi Controller - IoT Edge Computing Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/growloc-pi-controller
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /home/pi/growloc-pi-controller/dist/index.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=growloc-pi
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Increase file descriptor limit for serial port
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

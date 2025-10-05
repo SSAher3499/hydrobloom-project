@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # PostgreSQL + TimescaleDB for IoT Time-Series Data
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    environment:
+      POSTGRES_DB: growloc_db
+      POSTGRES_USER: growloc_user
+      POSTGRES_PASSWORD: growloc_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./backend/prisma/timescale-init.sql:/docker-entrypoint-initdb.d/02-timescale-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U growloc_user -d growloc_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and pub/sub
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MailHog for email testing
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+
+  # Mosquitto MQTT Broker for IoT Communication
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"    # MQTT (non-TLS for dev)
+      - "8883:8883"    # MQTT over TLS (production)
+      - "9001:9001"    # WebSocket
+    volumes:
+      - ./backend/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./backend/mosquitto/certs:/mosquitto/certs
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://growloc_user:growloc_password@postgres:5432/growloc_db
+      JWT_SECRET: your_jwt_secret_here
+      REDIS_URL: redis://redis:6379
+      MQTT_BROKER_URL: mqtt://mosquitto:1883
+      MQTT_USERNAME: growloc_mqtt
+      MQTT_PASSWORD: change_this_in_production
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm start
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+
+volumes:
+  postgres_data:
+  mosquitto_data:
+  mosquitto_log:

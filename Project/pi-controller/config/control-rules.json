@@ -1,0 +1,92 @@
+{
+  "rules": [
+    {
+      "id": "emergency_stop",
+      "name": "Emergency Stop",
+      "type": "EMERGENCY_STOP",
+      "isActive": true,
+      "priority": 100,
+      "conditions": {},
+      "actions": {}
+    },
+    {
+      "id": "temp_threshold_1",
+      "name": "High Temperature Fan Control",
+      "type": "THRESHOLD",
+      "isActive": true,
+      "priority": 80,
+      "conditions": {
+        "sensorId": "temp_sensor_1",
+        "operator": ">",
+        "threshold": 30
+      },
+      "actions": {
+        "actuatorId": "fan_1",
+        "targetState": 1
+      }
+    },
+    {
+      "id": "temp_threshold_2",
+      "name": "Normal Temperature Fan Off",
+      "type": "THRESHOLD",
+      "isActive": true,
+      "priority": 70,
+      "conditions": {
+        "sensorId": "temp_sensor_1",
+        "operator": "<=",
+        "threshold": 28
+      },
+      "actions": {
+        "actuatorId": "fan_1",
+        "targetState": 0
+      }
+    },
+    {
+      "id": "humidity_pid_1",
+      "name": "Humidity PID Control (Fogger)",
+      "type": "PID",
+      "isActive": true,
+      "priority": 60,
+      "conditions": {
+        "sensorId": "humidity_sensor_1"
+      },
+      "actions": {
+        "actuatorId": "fogger_1"
+      },
+      "pidConfig": {
+        "kp": 2.0,
+        "ki": 0.5,
+        "kd": 0.1,
+        "setpoint": 80,
+        "outputMin": 0,
+        "outputMax": 100
+      }
+    },
+    {
+      "id": "irrigation_schedule_morning",
+      "name": "Morning Irrigation",
+      "type": "SCHEDULED",
+      "isActive": true,
+      "priority": 50,
+      "schedule": "0 6 * * *",
+      "conditions": {},
+      "actions": {
+        "actuatorId": "pump_1",
+        "targetState": 1
+      }
+    },
+    {
+      "id": "irrigation_schedule_evening",
+      "name": "Evening Irrigation",
+      "type": "SCHEDULED",
+      "isActive": true,
+      "priority": 50,
+      "schedule": "0 18 * * *",
+      "conditions": {},
+      "actions": {
+        "actuatorId": "pump_1",
+        "targetState": 1
+      }
+    }
+  ]
+}

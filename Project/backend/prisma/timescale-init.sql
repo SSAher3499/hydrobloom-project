@@ -1,0 +1,44 @@
+-- TimescaleDB Initialization Script
+-- This script is run after Prisma migrations to enable time-series features
+
+-- Enable TimescaleDB extension
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+-- Note: The sensor_readings hypertable will be created after Prisma migrations
+-- Run this manually after migrations complete:
+--
+-- SELECT create_hypertable('sensor_readings', 'timestamp',
+--     chunk_time_interval => INTERVAL '1 day',
+--     if_not_exists => TRUE
+-- );
+--
+-- CREATE INDEX IF NOT EXISTS sensor_readings_sensor_timestamp_idx
+--     ON sensor_readings (sensorId, timestamp DESC);
+--
+-- -- Add retention policy (30 days for raw data)
+-- SELECT add_retention_policy('sensor_readings', INTERVAL '30 days', if_not_exists => TRUE);
+--
+-- -- Create continuous aggregates for hourly data
+-- CREATE MATERIALIZED VIEW IF NOT EXISTS sensor_readings_hourly
+-- WITH (timescaledb.continuous) AS
+-- SELECT
+--     time_bucket('1 hour', timestamp) AS hour,
+--     sensorId,
+--     AVG(value) AS avg_value,
+--     MIN(value) AS min_value,
+--     MAX(value) AS max_value,
+--     COUNT(*) AS num_readings
+-- FROM sensor_readings
+-- GROUP BY hour, sensorId
+-- WITH NO DATA;
+--
+-- -- Refresh policy for continuous aggregate
+-- SELECT add_continuous_aggregate_policy('sensor_readings_hourly',
+--     start_offset => INTERVAL '3 hours',
+--     end_offset => INTERVAL '1 hour',
+--     schedule_interval => INTERVAL '1 hour',
+--     if_not_exists => TRUE
+-- );
+--
+-- -- Retention for aggregated data (1 year)
+-- SELECT add_retention_policy('sensor_readings_hourly', INTERVAL '365 days', if_not_exists => TRUE);

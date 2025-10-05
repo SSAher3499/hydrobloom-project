@@ -1,0 +1,631 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  mobile              String?  @unique
+  name                String
+  role                Role     @default(FARM_MANAGER)
+  languagePref        String   @default("en")
+  isActive            Boolean  @default(true)
+  passwordHash        String?
+  onboardingCompleted Boolean  @default(false)
+  locationLat         Float?
+  locationLng         Float?
+  locationPlaceId     String?
+  address             String?
+  emailVerified       Boolean  @default(false)
+  mobileVerified      Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  assignedTasks      Task[]
+  alertSubscriptions AlertSubscription[]
+  farmAccess         FarmAccess[]
+  ownedAssets        Asset[]
+  createdInvites     Invite[]
+
+  @@map("users")
+}
+
+model Farm {
+  id        String   @id @default(cuid())
+  name      String
+  location  String?
+  timezone  String   @default("UTC")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  polyhouses      Polyhouse[]
+  users           FarmAccess[]
+  alertConfigs    AlertConfig[]
+  reservoirs      Reservoir[]
+  inventoryItems  InventoryItem[]
+  raspberryPis    RaspberryPi[]
+
+  @@map("farms")
+}
+
+model FarmAccess {
+  id        String   @id @default(cuid())
+  userId    String
+  farmId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, farmId])
+  @@map("farm_access")
+}
+
+model Polyhouse {
+  id        String   @id @default(cuid())
+  name      String
+  farmId    String
+  capacity  Int?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  farm          Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  zones         Zone[]
+  lifecycles    Lifecycle[]
+  tasks         Task[]
+  raspberryPis  RaspberryPi[]
+  actuators     ModbusActuator[]
+
+  @@map("polyhouses")
+}
+
+model Zone {
+  id          String   @id @default(cuid())
+  name        String
+  polyhouseId String
+  capacity    Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  polyhouse  Polyhouse        @relation(fields: [polyhouseId], references: [id], onDelete: Cascade)
+  sensors    Sensor[]
+  nurseries  Nursery[]
+  lifecycles Lifecycle[]
+  tasks      Task[]
+  actuators  ModbusActuator[]
+
+  @@map("zones")
+}
+
+model Nursery {
+  id        String   @id @default(cuid())
+  name      String
+  zoneId    String
+  capacity  Int?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  zone Zone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@map("nurseries")
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  cropType    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  stages     TemplateStage[]
+  lifecycles Lifecycle[]
+
+  @@map("templates")
+}
+
+model TemplateStage {
+  id                     String   @id @default(cuid())
+  templateId             String
+  name                   String
+  order                  Int
+  expectedDurationDays   Int
+  description            String?
+  expectedQuantity       Int?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  // Relations
+  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@map("template_stages")
+}
+
+model Lifecycle {
+  id                String           @id @default(cuid())
+  templateId        String
+  polyhouseId       String?
+  zoneId            String?
+  status            LifecycleStatus  @default(PLANNED)
+  expectedStartDate DateTime?
+  actualStartDate   DateTime?
+  expectedEndDate   DateTime?
+  actualEndDate     DateTime?
+  totalQuantity     Int?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relations
+  template   Template         @relation(fields: [templateId], references: [id])
+  polyhouse  Polyhouse?       @relation(fields: [polyhouseId], references: [id])
+  zone       Zone?            @relation(fields: [zoneId], references: [id])
+  stages     LifecycleStage[]
+
+  @@map("lifecycles")
+}
+
+model LifecycleStage {
+  id                   String    @id @default(cuid())
+  lifecycleId          String
+  name                 String
+  order                Int
+  expectedDurationDays Int
+  actualStartDate      DateTime?
+  actualEndDate        DateTime?
+  expectedQuantity     Int?
+  inboundQuantity      Int       @default(0)
+  outboundQuantity     Int       @default(0)
+  mortalityCount       Int       @default(0)
+  isCompleted          Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  lifecycle Lifecycle @relation(fields: [lifecycleId], references: [id], onDelete: Cascade)
+
+  @@map("lifecycle_stages")
+}
+
+model Task {
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  status        TaskStatus  @default(OPEN)
+  priority      Priority    @default(MEDIUM)
+  category      String?
+  assigneeId    String?
+  polyhouseId   String?
+  zoneId        String?
+  dueDate       DateTime?
+  isRecurring   Boolean     @default(false)
+  recurringType String?
+  attachments   String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  assignee  User?      @relation(fields: [assigneeId], references: [id])
+  polyhouse Polyhouse? @relation(fields: [polyhouseId], references: [id])
+  zone      Zone?      @relation(fields: [zoneId], references: [id])
+
+  @@map("tasks")
+}
+
+model Sensor {
+  id          String    @id @default(cuid())
+  zoneId      String
+  type        String
+  name        String?
+  latestValue Float?
+  unit        String?
+  lastSeen    DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Modbus-specific fields (optional for non-Modbus sensors)
+  raspberryPiId       String?
+  modbusSlaveId       Int?
+  modbusRegisterAddr  Int?
+  modbusRegisterType  String?  // "holding", "input", "coil", "discrete"
+  modbusFunctionCode  Int?     // 1, 2, 3, 4, etc.
+  baudRate            Int?
+  scalingFactor       Float?   // For converting raw Modbus values
+  scalingOffset       Float?
+
+  // Relations
+  zone         Zone             @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  readings     SensorReading[]
+  raspberryPi  RaspberryPi?     @relation(fields: [raspberryPiId], references: [id], onDelete: SetNull)
+
+  @@map("sensors")
+}
+
+model SensorReading {
+  id        String   @id @default(cuid())
+  sensorId  String
+  value     Float
+  timestamp DateTime @default(now())
+
+  // Relations
+  sensor Sensor @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+
+  @@index([sensorId, timestamp(sort: Desc)])
+  @@index([timestamp(sort: Desc)])
+  @@map("sensor_readings")
+}
+
+model AlertConfig {
+  id          String    @id @default(cuid())
+  name        String
+  farmId      String
+  repeatsIn   Int
+  repeatUnit  String
+  isActive    Boolean   @default(true)
+  conditions  Json
+  channels    String?
+  lastTriggered DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  farm          Farm                @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  subscribers   AlertSubscription[]
+  alerts        Alert[]
+
+  @@map("alert_configs")
+}
+
+model Alert {
+  id              String      @id @default(cuid())
+  configId        String?
+  farmId          String
+  severity        AlertSeverity @default(MEDIUM)
+  title           String
+  message         String
+  source          String?
+  isAcknowledged  Boolean     @default(false)
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime?
+  isResolved      Boolean     @default(false)
+  resolvedAt      DateTime?
+  createdAt       DateTime    @default(now())
+
+  // Relations
+  config AlertConfig? @relation(fields: [configId], references: [id], onDelete: SetNull)
+
+  @@map("alerts")
+}
+
+model AlertSubscription {
+  id            String   @id @default(cuid())
+  alertConfigId String
+  userId        String
+  createdAt     DateTime @default(now())
+
+  // Relations
+  alertConfig AlertConfig @relation(fields: [alertConfigId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([alertConfigId, userId])
+  @@map("alert_subscriptions")
+}
+
+model Reservoir {
+  id            String   @id @default(cuid())
+  name          String
+  farmId        String
+  capacity      Float?
+  currentLevel  Float?
+  lastRefill    DateTime?
+  treatHistory  Json?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@map("reservoirs")
+}
+
+model InventoryItem {
+  id           String   @id @default(cuid())
+  name         String
+  farmId       String
+  category     String?
+  currentStock Float    @default(0)
+  unit         String?
+  costPerUnit  Float?
+  lowStockAlert Float?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  farm        Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  transactions InventoryTransaction[]
+
+  @@map("inventory_items")
+}
+
+model InventoryTransaction {
+  id              String              @id @default(cuid())
+  inventoryItemId String
+  type            TransactionType
+  quantity        Float
+  unitCost        Float?
+  totalCost       Float?
+  notes           String?
+  createdAt       DateTime            @default(now())
+
+  // Relations
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_transactions")
+}
+
+// Enums
+enum Role {
+  OWNER
+  ADMIN
+  FARM_MANAGER
+  VIEWER
+}
+
+enum LifecycleStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  IN_REVIEW
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TransactionType {
+  INBOUND
+  OUTBOUND
+}
+
+model Asset {
+  id             String   @id @default(cuid())
+  ownerId        String
+  type           AssetType
+  name           String
+  controllerMacid String  @unique
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("assets")
+}
+
+model Invite {
+  id           String      @id @default(cuid())
+  email        String?
+  mobile       String?
+  role         Role        @default(VIEWER)
+  status       InviteStatus @default(PENDING)
+  languagePref String      @default("en")
+  token        String      @unique
+  expiresAt    DateTime
+  createdById  String
+  createdAt    DateTime    @default(now())
+
+  // Relations
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@map("invites")
+}
+
+model OtpLog {
+  id        String   @id @default(cuid())
+  contact   String
+  otpHash   String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  sentAt    DateTime @default(now())
+  usedAt    DateTime?
+
+  @@map("otp_logs")
+}
+
+enum AssetType {
+  POLYHOUSE
+  FERTIGATION
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Command {
+  id          String      @id @default(cuid())
+  farmId      String
+  targetType  String
+  targetId    String
+  action      String
+  parameters  Json?
+  status      CommandStatus @default(PENDING)
+  requestedBy String?
+  executedAt  DateTime?
+  result      String?
+  error       String?
+  createdAt   DateTime    @default(now())
+
+  @@map("commands")
+}
+
+enum CommandStatus {
+  PENDING
+  EXECUTED
+  FAILED
+}
+
+model EmailOtp {
+  id         String   @id @default(cuid())
+  email      String
+  otpHash    String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([email, expiresAt])
+  @@map("email_otps")
+}
+
+// ============================================================================
+// IoT / Industrial Automation Models
+// ============================================================================
+
+model RaspberryPi {
+  id              String    @id @default(cuid())
+  name            String
+  macAddress      String    @unique
+  ipAddress       String?
+  farmId          String?
+  polyhouseId     String?
+  status          PiStatus  @default(OFFLINE)
+  lastSeen        DateTime?
+  firmwareVersion String?
+  serialPort      String    @default("/dev/ttyUSB0")
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  farm      Farm?            @relation(fields: [farmId], references: [id], onDelete: SetNull)
+  polyhouse Polyhouse?       @relation(fields: [polyhouseId], references: [id], onDelete: SetNull)
+  sensors   Sensor[]
+  actuators ModbusActuator[]
+  rules     ControlRule[]
+
+  @@map("raspberry_pis")
+}
+
+model ModbusActuator {
+  id                  String    @id @default(cuid())
+  name                String
+  raspberryPiId       String
+  zoneId              String?
+  polyhouseId         String?
+  type                ActuatorType
+  modbusSlaveId       Int
+  modbusRegisterAddr  Int
+  modbusRegisterType  String    @default("coil")  // "coil" or "holding"
+  modbusFunctionCode  Int       @default(5)       // 5=write single coil, 6=write single register
+  currentState        Int       @default(0)       // 0=OFF, 1=ON (or PWM value 0-100)
+  isActive            Boolean   @default(true)
+  lastToggled         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  raspberryPi RaspberryPi @relation(fields: [raspberryPiId], references: [id], onDelete: Cascade)
+  zone        Zone?       @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  polyhouse   Polyhouse?  @relation(fields: [polyhouseId], references: [id], onDelete: SetNull)
+  rules       ControlRule[]
+
+  @@map("modbus_actuators")
+}
+
+model ControlRule {
+  id              String         @id @default(cuid())
+  name            String
+  raspberryPiId   String
+  ruleType        ControlRuleType
+  isActive        Boolean        @default(true)
+  priority        Int            @default(0)
+  conditions      Json           // { sensorId, operator, threshold, etc. }
+  actions         Json           // { actuatorId, targetState, etc. }
+  schedule        String?        // Cron expression for scheduled rules
+  pidConfig       Json?          // { kp, ki, kd, setpoint, outputMin, outputMax }
+  lastTriggered   DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  raspberryPi RaspberryPi     @relation(fields: [raspberryPiId], references: [id], onDelete: Cascade)
+  actuator    ModbusActuator? @relation(fields: [actuatorId], references: [id], onDelete: SetNull)
+  actuatorId  String?
+
+  @@map("control_rules")
+}
+
+// ============================================================================
+// IoT Enums
+// ============================================================================
+
+enum PiStatus {
+  ONLINE
+  OFFLINE
+  ERROR
+  MAINTENANCE
+}
+
+enum ActuatorType {
+  FAN
+  PUMP
+  FOGGER
+  MOTOR
+  VALVE
+  HEATER
+  COOLER
+  LIGHT
+  VENT
+}
+
+enum ControlRuleType {
+  THRESHOLD       // Simple ON/OFF based on sensor threshold
+  PID             // PID control loop
+  SCHEDULED       // Time-based (cron)
+  EMERGENCY_STOP  // Emergency stop rule
+}
